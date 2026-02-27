@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -10,24 +11,67 @@ import {
 import {
   Zap, Plus, Users, LayoutDashboard, ScrollText,
   Settings, SlidersHorizontal, ClipboardList, Building2,
+  Menu, X, Shield,
 } from "lucide-react";
 
 export function Sidebar() {
   const pathname = usePathname();
+  const [mobileOpen, setMobileOpen] = useState(false);
   const { data: agents } = usePolling<Record<string, AgentConfig>>(getAgents, 5000);
   const { data: teams } = usePolling<Record<string, TeamConfig>>(getTeams, 5000);
 
   const agentEntries = agents ? Object.entries(agents) : [];
   const teamEntries = teams ? Object.entries(teams) : [];
 
+  // Close sidebar on route change (mobile)
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [pathname]);
+
   return (
-    <aside className="flex h-screen w-64 flex-col border-r bg-card">
+    <>
+      {/* Mobile header bar */}
+      <div className="md:hidden fixed top-0 left-0 right-0 z-50 flex items-center gap-2.5 px-4 py-3 bg-card border-b">
+        <button
+          onClick={() => setMobileOpen(true)}
+          className="p-1.5 -ml-1.5 text-muted-foreground hover:text-foreground transition-colors"
+          aria-label="Open menu"
+        >
+          <Menu className="h-5 w-5" />
+        </button>
+        <div className="flex h-6 w-6 items-center justify-center bg-primary text-primary-foreground">
+          <Zap className="h-3 w-3" />
+        </div>
+        <span className="text-sm font-bold tracking-tight">TinyClaw</span>
+      </div>
+
+      {/* Mobile overlay */}
+      {mobileOpen && (
+        <div
+          className="md:hidden fixed inset-0 z-50 bg-black/50"
+          onClick={() => setMobileOpen(false)}
+        />
+      )}
+
+      {/* Sidebar */}
+      <aside className={cn(
+        "flex h-screen w-64 flex-col border-r bg-card",
+        "fixed md:static z-50 transition-transform duration-200 ease-in-out",
+        mobileOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
+      )}>
       {/* Header */}
       <div className="flex items-center gap-2.5 px-4 pt-4 pb-2">
         <div className="flex h-7 w-7 items-center justify-center bg-primary text-primary-foreground">
           <Zap className="h-3.5 w-3.5" />
         </div>
-        <span className="text-sm font-bold tracking-tight">TinyClaw</span>
+        <span className="text-sm font-bold tracking-tight flex-1">TinyClaw</span>
+        <button
+          onClick={() => setMobileOpen(false)}
+          className="md:hidden p-1 text-muted-foreground hover:text-foreground transition-colors"
+          aria-label="Close menu"
+        >
+          <X className="h-4 w-4" />
+        </button>
       </div>
 
       {/* New Chat + Dashboard + Logs */}
@@ -48,6 +92,7 @@ export function Sidebar() {
           { href: "/", label: "Dashboard", icon: LayoutDashboard },
           { href: "/office", label: "Office", icon: Building2 },
           { href: "/tasks", label: "Tasks", icon: ClipboardList },
+          { href: "/pairing", label: "Pairing", icon: Shield },
           { href: "/logs", label: "Logs", icon: ScrollText },
         ].map(({ href, label, icon: Icon }) => {
           const active = href === "/" ? pathname === "/" : pathname.startsWith(href);
@@ -209,6 +254,7 @@ export function Sidebar() {
           Queue Processor Active
         </div>
       </div>
-    </aside>
+      </aside>
+    </>
   );
 }

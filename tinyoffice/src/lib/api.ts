@@ -176,6 +176,48 @@ export async function reorderTasks(columns: Record<string, string[]>): Promise<{
 
 // ── SSE ───────────────────────────────────────────────────────────────────
 
+// ── Pairing ───────────────────────────────────────────────────────────────
+
+export interface PendingPairing {
+  code: string;
+  channel: string;
+  sender: string;
+  senderId: string;
+  createdAt: number;
+}
+
+export interface ApprovedPairing {
+  channel: string;
+  sender: string;
+  senderId: string;
+  approvedAt: number;
+  approvedCode?: string;
+}
+
+export interface PairingData {
+  pending: PendingPairing[];
+  approved: ApprovedPairing[];
+}
+
+export async function getPairing(): Promise<PairingData> {
+  return apiFetch("/api/pairing");
+}
+
+export async function approvePairing(code: string): Promise<{ ok: boolean }> {
+  return apiFetch("/api/pairing/approve", {
+    method: "POST",
+    body: JSON.stringify({ code }),
+  });
+}
+
+export async function unpairSender(channel: string, senderId: string): Promise<{ ok: boolean }> {
+  return apiFetch(`/api/pairing/${encodeURIComponent(channel)}/${encodeURIComponent(senderId)}`, {
+    method: "DELETE",
+  });
+}
+
+// ── SSE Stream ────────────────────────────────────────────────────────────
+
 export function subscribeToEvents(
   onEvent: (event: EventData) => void,
   onError?: (err: Event) => void
