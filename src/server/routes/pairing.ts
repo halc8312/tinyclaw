@@ -39,7 +39,8 @@ function readPairing(): PairingData {
             pending: data.pending || [],
             approved: data.approved || [],
         };
-    } catch {
+    } catch (err) {
+        console.error('[pairing] Failed to read pairing file:', (err as Error).message);
         return { pending: [], approved: [] };
     }
 }
