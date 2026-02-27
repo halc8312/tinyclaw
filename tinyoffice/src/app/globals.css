@@ -124,3 +124,24 @@ body {
 .animate-dash {
   animation: dash 1s linear infinite;
 }
+
+/* Mobile touch optimizations */
+@media (max-width: 767px) {
+  /* Ensure minimum touch target sizes */
+  button, a, [role="button"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Prevent text selection on interactive elements */
+  button, a {
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Smooth scrolling for mobile */
+  main {
+    -webkit-overflow-scrolling: touch;
+  }
+}
